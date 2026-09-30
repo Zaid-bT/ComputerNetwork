@@ -2,7 +2,7 @@ import socket
 import struct
 import random
 
-def encode_domain(domain):
+def encode_domain(domain): #convert domain into dns format
     parts = domain.strip(".").split(".")
     encoded = b""
     for part in parts:
@@ -11,8 +11,8 @@ def encode_domain(domain):
     encoded += b"\x00"
     return encoded
 
-def build_query(domain, transaction_id):
-    header = struct.pack(
+def build_query(domain, transaction_id): #build dns query requesy packet
+    header = struct.pack( #flags
         "!HHHHHH",
         transaction_id,
         0x0100,
@@ -29,7 +29,7 @@ def build_query(domain, transaction_id):
     )
     return header + question
 
-def parse_domain_name(data, offset):
+def parse_domain_name(data, offset): #read domain name from dns packets
     labels = []
     original_offset = offset
     jumped = False
@@ -63,7 +63,7 @@ def parse_domain_name(data, offset):
         return name, original_offset
     return name, offset
     
-def parse_response(data, transaction_id):
+def parse_response(data, transaction_id): #decode the dns query 
     if len(data) < 12:
         raise ValueError("DNS response is too short")
     (
@@ -143,7 +143,7 @@ def parse_response(data, transaction_id):
         "additional_count": arcount
     }
     
-def query_dns(domain, dns_server):
+def query_dns(domain, dns_server): #send or receive dns packets using udp
     transaction_id = random.randint(0, 65535)
     query = build_query(domain, transaction_id)
     sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
@@ -158,7 +158,7 @@ def query_dns(domain, dns_server):
     finally:
         sock.close()
 
-def display_result(domain, dns_server, result):
+def display_result(domain, dns_server, result): 
     print("\n==========================================")
     print("DNS RESPONSE")
     print("==========================================")
